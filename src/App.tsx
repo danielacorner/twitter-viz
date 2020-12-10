@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./App.css";
 import styled from "styled-components/macro";
 import BottomDrawer from "./components/BottomDrawer/BottomDrawer";
@@ -7,7 +7,7 @@ import { useFetchTweetsByIds } from "./utils/hooks";
 import {
   useSetTweets,
   useLoading,
-  useTweets,
+  useNodes,
   useSetLoading,
   useConfig,
 } from "./providers/store";
@@ -19,6 +19,15 @@ import LeftDrawer, { LEFT_DRAWER_WIDTH } from "./components/LeftDrawer";
 import qs from "query-string";
 import { useLocation } from "react-router";
 import NavAndViz from "components/NavAndViz/NavAndViz";
+import * as d3 from "d3";
+
+// compare to RCSB.org protein viewer https://www.rcsb.org/3d-view/3j3q/1
+
+// download pdb structures https://www.rcsb.org/downloads
+
+// there are at least 200 million proteins in nature
+
+//
 
 const AppStyles = styled.div`
   transition: background 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
@@ -73,8 +82,21 @@ const MAX_LOADING_TIME = 2 * 1000;
 function useStopLoadingEventually() {
   const loading = useLoading();
   const setLoading = useSetLoading();
-  const tweets = useTweets();
-  const prevTweets = useRef(tweets);
+  // const nodes = useNodes();
+  const [nodes, setNodes] = useState();
+  useMount(() => {
+    // fetch the nodes on mount
+    d3.xml("data/protein.xml").then((xml) => {
+      const data = d3
+        .select(xml)
+        .selectAll("data")
+        .each((data) => data);
+      console.log("🌟🚨 ~ d3.xml ~ data", data);
+      console.log("🌟🚨 ~ useMount ~ xml", xml);
+      setNodes(data);
+    });
+  });
+  const prevTweets = useRef(nodes);
 
   // when loading starts, start a timer to stop loading
   useEffect(() => {
@@ -85,11 +107,11 @@ function useStopLoadingEventually() {
     return () => {
       clearTimeout(timer);
     };
-  }, [loading, setLoading, tweets]);
+  }, [loading, setLoading, nodes]);
 
-  // when tweets length changes, stop loading
+  // when nodes length changes, stop loading
   useEffect(() => {
-    if (prevTweets.current.length !== tweets.length) {
+    if (prevTweets.current.length !== nodes.length) {
       setLoading(false);
       const app = document.querySelector(".App");
       if (!app) {
@@ -97,7 +119,7 @@ function useStopLoadingEventually() {
       }
       (app as HTMLElement).style.cursor = "unset";
     }
-  }, [tweets, setLoading]);
+  }, [nodes, setLoading]);
 }
 
 function AppStylesHooks() {
@@ -127,7 +149,7 @@ export default App;
 function useFetchTweetsOnMount() {
   const setTweets = useSetTweets();
 
-  // fetch tweets from DB on mount
+  // fetch nodes from DB on mount
   useMount(() => {
     if (process.env.NODE_ENV === "development") {
       return;
@@ -152,20 +174,20 @@ function useFetchTweetsOnMount() {
   });
 }
 
-/** fetch tweets if there's a query string like /?t=12345,12346
+/** fetch nodes if there's a query string like /?t=12345,12346
  *
  * [docs](https://docs.fauna.com/fauna/current/tutorials/crud?lang=javascript#retrieve)
  */
 function useFetchQueryTweetsOnMount() {
   const query = useQueryString();
-  const qTweets = query.tweets;
+  const qTweets = query.nodes;
   const fetchTweetsByIds = useFetchTweetsByIds();
-  const tweets = useTweets();
-  // fetch tweets from DB on mount
+  const nodes = useNodes();
+  // fetch nodes from DB on mount
   useMount(() => {
     if (
-      // skip if we already have tweets,
-      tweets.length > 0 ||
+      // skip if we already have nodes,
+      nodes.length > 0 ||
       // or if the query is empty
       !qTweets ||
       qTweets.length === 0

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
-import { useTweets } from "../../providers/store";
+import { useNodes } from "../../providers/store";
 import { useFetchBotScoreForTweet } from "components/common/useFetchBotScoreForTweet";
 
-/** when tweets change, fetch bot scores for each */
+/** when nodes change, fetch bot scores for each */
 export function useGenerateBotScoresOnNewTweets() {
-  const tweets = useTweets();
+  const nodes = useNodes();
   const fetchBotScoreForTweet = useFetchBotScoreForTweet();
 
   // faily rate limit of 500 so just fetch 1 per load
@@ -14,8 +14,8 @@ export function useGenerateBotScoresOnNewTweets() {
   useEffect(() => {
     // fetch the first one only
     // use a for loop to force synchronous (forEach is parallel)
-    for (let index = 0; index < tweets.length; index++) {
-      const tweet = tweets[index];
+    for (let index = 0; index < nodes.length; index++) {
+      const tweet = nodes[index];
       if (!foundOne.current && !tweet.botScore) {
         foundOne.current = true;
         setTimeout(() => {
@@ -23,5 +23,5 @@ export function useGenerateBotScoresOnNewTweets() {
         }, 1001);
       }
     }
-  }, [tweets, fetchBotScoreForTweet]);
+  }, [nodes, fetchBotScoreForTweet]);
 }

@@ -148,7 +148,7 @@ type Tweet {
 type Query {
   allTweets: [Tweet!]
   getTweet(id_str: String!): Tweet!
-  tweetsByUserId(id_str: String!): [Tweet!]
+  nodesByUserId(id_str: String!): [Tweet!]
 }
 
 type Mutation {

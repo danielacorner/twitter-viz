@@ -84,7 +84,7 @@
   "scripts": {
     "client": "react-scripts start",
     "server": "cd twit && npm run start",
-    "start": "npm run dev",
+    "start": "npm run client",
     "dev": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\"",
     "build": "react-scripts build",
     "test": "react-scripts test",

@@ -60,7 +60,7 @@ export default function BtnFavorite({
 
 /** localStorage getters, setters, togglers */
 export function getFavorites() {
-  // tweets
+  // nodes
 
   const getFavs = () =>
     JSON.parse(window.localStorage.getItem("favorites") || "[]");

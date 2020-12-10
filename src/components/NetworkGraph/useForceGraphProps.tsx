@@ -300,7 +300,7 @@ export function useForceGraphProps() {
     enableZoomPanInteraction: true,
     enableNavigationControls: true,
     // onLinkHover: (link, prevLink) => {},
-    enablePointerInteraction: /* tweets.length<500 */ true,
+    enablePointerInteraction: /* nodes.length<500 */ true,
     enableNodeDrag: true,
     // when we start to drag, pause the simulation
   };

@@ -12,7 +12,7 @@ export function BtnFetchFavoriteTweets() {
   const loading = useLoading();
   return (
     <CollapsibleButton
-      tooltipTitle="Favorite tweets"
+      tooltipTitle="Favorite nodes"
       css={`
         margin: auto !important;
         width: fit-content;

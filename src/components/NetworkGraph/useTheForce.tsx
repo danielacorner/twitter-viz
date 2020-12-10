@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { NODE_DIAMETER, AVATAR_DIAMETER } from "./useForceGraphProps";
-import { useConfig, useTweets } from "../../providers/store";
+import { useConfig, useNodes } from "../../providers/store";
 import * as d3 from "d3";
 import {
   useGetIsLikeLink,
@@ -22,24 +22,24 @@ export function useTheForce(fg: any, graph: { nodes: any[]; links: any[] }) {
     isPaused,
   } = useConfig();
 
-  // in Grid mode, when we fetch new tweets, temporarily unpause
-  const tweets = useTweets();
-  const prevTweets = useRef(tweets);
+  // in Grid mode, when we fetch new nodes, temporarily unpause
+  const nodes = useNodes();
+  const prevTweets = useRef(nodes);
   useEffect(() => {
     let timer;
-    if (isGridMode && isPaused && tweets.length !== prevTweets.current.length) {
+    if (isGridMode && isPaused && nodes.length !== prevTweets.current.length) {
       setConfig({ isPaused: false });
       timer = window.setTimeout(() => setConfig({ isPaused: false }), 1000);
     }
 
-    prevTweets.current = tweets;
+    prevTweets.current = nodes;
 
     return () => {
       if (timer) {
         window.clearTimeout(timer);
       }
     };
-  }, [setConfig, tweets, isGridMode, isPaused]);
+  }, [setConfig, nodes, isGridMode, isPaused]);
 
   // pause when we activate grid mode
   // unpause when we deactivate grid mode

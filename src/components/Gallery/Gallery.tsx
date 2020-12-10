@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   useConfig,
-  useTweets,
+  useNodes,
   useLoading,
   useDeleteTweet,
   usePrevious,
@@ -126,15 +126,15 @@ const GalleryStyles = styled.div`
 `;
 
 const Gallery = () => {
-  const tweets = useTweets();
-  const prevTweets: Tweet[] = usePrevious(tweets || []);
+  const nodes = useNodes();
+  const prevTweets: Tweet[] = usePrevious(nodes || []);
   const theme = useTheme();
   const loading = useLoading();
 
   let firstUserId = "";
   const areAllTweetsSameUser =
-    tweets.length > 0 &&
-    tweets.reduce((acc, tweet, idx) => {
+    nodes.length > 0 &&
+    nodes.reduce((acc, tweet, idx) => {
       if (idx === 0) {
         firstUserId = tweet.user.id_str;
       } else {
@@ -143,24 +143,24 @@ const Gallery = () => {
       return acc;
     }, true);
 
-  // when we stream tweets,
+  // when we stream nodes,
   // if in "replace" mode,
   // scroll to top
   const ref = useRef();
   const { replace } = useConfig();
   useEffect(() => {
     const didJustDeleteOneTweet =
-      prevTweets && Math.abs(tweets.length - (prevTweets?.length || 0)) === 1;
+      prevTweets && Math.abs(nodes.length - (prevTweets?.length || 0)) === 1;
     if (
       !areAllTweetsSameUser &&
       !didJustDeleteOneTweet &&
       replace &&
-      tweets.length !== 0 &&
+      nodes.length !== 0 &&
       ref.current
     ) {
       (ref.current as any).scrollTop = 0;
     }
-  }, [tweets, prevTweets, replace, areAllTweetsSameUser]);
+  }, [nodes, prevTweets, replace, areAllTweetsSameUser]);
 
   return (
     <GalleryStyles
@@ -170,18 +170,18 @@ const Gallery = () => {
     >
       {areAllTweetsSameUser && (
         <div className="userAvatarWrapper">
-          <UserAvatar user={tweets[0]?.user} imageOnly={false} large={true} />
+          <UserAvatar user={nodes[0]?.user} imageOnly={false} large={true} />
         </div>
       )}
       <div className="galleryContent">
-        {tweets.map((tweet) => (
+        {nodes.map((tweet) => (
           <GridItem key={tweet.id_str} tweet={tweet} />
         ))}
       </div>
       {loading ? <ScrollMoreIndicator /> : null}
       {areAllTweetsSameUser && (
         <div className="btnFetchMoreWrapper">
-          <BtnFetchMore user={tweets[0]?.user} />
+          <BtnFetchMore user={nodes[0]?.user} />
         </div>
       )}
     </GalleryStyles>

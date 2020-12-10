@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import {
   useLoading,
-  useTweets,
+  useNodes,
   useSetTweets,
   useIsLeftDrawerOpen,
   useSetLoading,
@@ -93,14 +93,14 @@ function SaveDataControls() {
 }
 
 function SaveDataForm() {
-  const tweets = useTweets();
+  const nodes = useNodes();
   const { addSave } = useSavedDatasets();
   const [dataName, setDataName] = useState("");
   return (
     <TwoColFormStyles
       onSubmit={(e) => {
         e.preventDefault();
-        addSave({ saveName: dataName, ids: tweets.map((t) => t.id_str) });
+        addSave({ saveName: dataName, ids: nodes.map((t) => t.id_str) });
       }}
     >
       <TextField
@@ -113,7 +113,7 @@ function SaveDataForm() {
         type="submit"
         variant="contained"
         color="secondary"
-        disabled={tweets.length === 0}
+        disabled={nodes.length === 0}
       >
         <SaveIcon />
       </Button>
@@ -135,8 +135,8 @@ function SavedDatasetsList() {
       `${SERVER_URL}/api/get?ids=${saves[savesIdx].ids}`
     );
 
-    const tweetsResponses = await resp.json();
-    const data = tweetsResponses.map((d) => d.data);
+    const nodesResponses = await resp.json();
+    const data = nodesResponses.map((d) => d.data);
 
     setTweets(data);
   };

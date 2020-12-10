@@ -1,7 +1,7 @@
 import React from "react";
 import ReactWordcloud from "react-wordcloud";
 import styled from "styled-components/macro";
-import { useTweets, useWordcloudConfig } from "../../providers/store";
+import { useNodes, useWordcloudConfig } from "../../providers/store";
 
 const WordcloudStyles = styled.div`
   height: 100%;
@@ -10,21 +10,21 @@ const WordcloudStyles = styled.div`
 
 /** https://www.npmjs.com/package/react-wordcloud  */
 const Wordcloud = () => {
-  const tweets = useTweets();
+  const nodes = useNodes();
   const { minChars, maxChars, minInstances, numAngles } = useWordcloudConfig();
 
   // grab text from tweet, quoted tweet
-  const tweetsWithText: {
+  const nodesWithText: {
     id_str: string;
     text: string;
     quotedText?: string;
-  }[] = tweets.map((t) => ({
+  }[] = nodes.map((t) => ({
     id_str: t.id_str,
     text: t.text,
     quotedText: t.quoted_status?.text,
   }));
 
-  const allTextJoined: string = tweetsWithText.reduce((acc, cur) => {
+  const allTextJoined: string = nodesWithText.reduce((acc, cur) => {
     return acc + cur.text + (cur.quotedText || "");
   }, "");
 

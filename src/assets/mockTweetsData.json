@@ -1,5 +1,5 @@
 {
-  "tweets": [
+  "nodes": [
     {
       "botScore":{"overall": 1,
         "astroturf": 2,

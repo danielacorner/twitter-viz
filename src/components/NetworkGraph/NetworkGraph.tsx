@@ -8,7 +8,7 @@ import {
   useConfig,
   useLikesByUserId,
   useRetweetsByTweetId,
-  useTweets,
+  useNodes,
 } from "../../providers/store";
 // https://www.npmjs.com/package/d3-force-cluster
 import { Link, Tweet } from "../../types";
@@ -36,15 +36,15 @@ const NetworkGraph = () => {
 function Graph() {
   const { fgRef, forceGraphProps } = useForceGraphProps();
   const { is3d, showUserNodes, replace } = useConfig();
-  const tweets = useTweets();
-  console.log("🌟🚨: Graph -> tweets", tweets);
+  const nodes = useNodes();
+  console.log("🌟🚨: Graph -> nodes", nodes);
   const likesByUserId = useLikesByUserId();
   const retweetsByTweetId = useRetweetsByTweetId();
 
   // uncomment to grab the current state and copy-paste into mockTweetsData.json
 
   // console.log("🌟🚨: Graph -> mockTweetsData", {
-  //   tweets,
+  //   nodes,
   //   retweetsByTweetId,
   //   likesByUserId,
   // });
@@ -81,7 +81,7 @@ function Graph() {
     : [];
 
   const tweetToRetweetsLinks = showUserNodes
-    ? tweets.reduce((acc, tweet) => {
+    ? nodes.reduce((acc, tweet) => {
         const retweetsOfThisTweet = retweetsByTweetId[tweet.id_str];
         if (retweetsOfThisTweet) {
           const linksFromRetweetsOfThisTweet = retweetsOfThisTweet.map(
@@ -106,8 +106,8 @@ function Graph() {
       ...tweetToRetweetsLinks,
       ...(showUserNodes
         ? [
-            // links from each user to their tweets
-            ...tweets.map((t) => ({
+            // links from each user to their nodes
+            ...nodes.map((t) => ({
               // source: its user
               source: Number(t.user.id_str),
               // target: the tweet
@@ -125,39 +125,21 @@ function Graph() {
   // show/hide user nodes
   //
 
-  useEffect(() => {
-    if (!showUserNodes) {
-      setUserNodes([]);
-    } else {
-      // add nodes for each user
-
-      const nonUniqueUserNodes: Tweet[] = tweets.map((tweet) => ({
-        ...EMPTY_TWEET,
-        id: Number(tweet.user.id_str),
-        id_str: tweet.user.id_str,
-        user: tweet.user,
-        isUserNode: true,
-      }));
-
-      // deduplicate
-      const newUserNodes = uniqBy(nonUniqueUserNodes, (d) => d.user.id_str);
-      setUserNodes(newUserNodes);
-    }
-  }, [showUserNodes, tweets]);
+  useShowHideUserNodes(showUserNodes, setUserNodes, nodes);
 
   //
   // sync graph with store
   //
 
   useEffect(() => {
-    const tweetsWithUser: Tweet[] = tweets
+    const nodesWithUser: Tweet[] = nodes
       // id <- +id_str
       .map((t) => ({
         ...t,
         id: Number(t.id_str),
       }))
       .filter((t) => Boolean(t.user?.id_str));
-    // filter out tweets without users
+    // filter out nodes without users
 
     const nodeIds = graph.nodes.map((node) => node.id_str);
 
@@ -165,9 +147,9 @@ function Graph() {
 
     // if replacing, replace all
     const newNodes = replace
-      ? tweets
+      ? nodes
       : // new nodes are ones whose ids aren't already in the graph
-        tweetsWithUser.filter((node) => !nodeIds.includes(node.id_str));
+        nodesWithUser.filter((node) => !nodeIds.includes(node.id_str));
 
     // * consider spreading newLinks if not doing so causes a performance issue
 
@@ -184,7 +166,7 @@ function Graph() {
       };
     });
     // eslint-disable-next-line
-  }, [tweets, replace]);
+  }, [nodes, replace]);
 
   const fg = fgRef.current as any;
 
@@ -193,7 +175,7 @@ function Graph() {
   //
   useTheForce(fg, graph);
 
-  // when new tweets arrive, fetch their bot scores
+  // when new nodes arrive, fetch their bot scores
   // TODO: disabled while testing
   // useGenerateBotScoresOnNewTweets();
 
@@ -218,3 +200,28 @@ function Graph() {
 }
 
 export default NetworkGraph;
+
+function useShowHideUserNodes(
+  showUserNodes: boolean,
+  setUserNodes: React.Dispatch<React.SetStateAction<Tweet[]>>,
+  nodes: Tweet[]
+) {
+  useEffect(() => {
+    if (!showUserNodes) {
+      setUserNodes([]);
+    } else {
+      // add nodes for each user
+      const nonUniqueUserNodes: Tweet[] = nodes.map((tweet) => ({
+        ...EMPTY_TWEET,
+        id: Number(tweet.user.id_str),
+        id_str: tweet.user.id_str,
+        user: tweet.user,
+        isUserNode: true,
+      }));
+
+      // deduplicate
+      const newUserNodes = uniqBy(nonUniqueUserNodes, (d) => d.user.id_str);
+      setUserNodes(newUserNodes);
+    }
+  }, [showUserNodes, nodes]);
+}

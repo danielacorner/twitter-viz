@@ -11,12 +11,12 @@ import qs from "query-string";
 export const useSearchObj = () => qs.parse(useLocation().search);
 
 export type GlobalStateStoreType = {
-  tweetsFromServer: Tweet[];
+  nodesFromServer: Tweet[];
   selectedNode: Tweet | null;
   setSelectedNode: (node: Tweet | null) => void;
   tooltipNode: Tweet | null;
   setTooltipNode: (node: Tweet | null) => void;
-  setTweetsFromServer: (tweets: Tweet[]) => void;
+  setTweetsFromServer: (nodes: Tweet[]) => void;
   config: AppConfig;
   setConfig: (newConfig: Partial<AppConfig>) => void;
   likesByUserId: { [userId: string]: string[] };
@@ -69,18 +69,18 @@ export type AppConfig = {
   numTweets: number;
 };
 
-// use to turn off mock tweets in dev mode
+// use to turn off mock nodes in dev mode
 const SHOULD_MOCK_TWEETS = true;
 
 const [useStore] = create(
   (set) =>
     ({
-      tweetsFromServer:
+      nodesFromServer:
         process.env.NODE_ENV === "development" && SHOULD_MOCK_TWEETS
-          ? mockTweetsData.tweets
+          ? mockTweetsData.nodes
           : ([] as Tweet[]),
       // map between tweet.user.id_str and the liked tweet.id_str
-      // likesByUserId is populated when we "fetch tweets liked by a user"
+      // likesByUserId is populated when we "fetch nodes liked by a user"
       likesByUserId:
         process.env.NODE_ENV === "development"
           ? mockTweetsData.likesByUserId
@@ -101,8 +101,7 @@ const [useStore] = create(
       tooltipNode: null as Tweet | null,
       setTooltipNode: (node: Tweet | null) =>
         set(() => ({ tooltipNode: node })),
-      setTweetsFromServer: (tweets) =>
-        set(() => ({ tweetsFromServer: tweets })),
+      setTweetsFromServer: (nodes) => set(() => ({ nodesFromServer: nodes })),
       loading: false,
       // * only works for authenticated user (me)
       // repliesByUserId: {},
@@ -260,8 +259,8 @@ export const useConfig = () => {
   };
 };
 
-export const useTweets = (): Tweet[] =>
-  useStore((state) => (state as GlobalStateStoreType).tweetsFromServer);
+export const useNodes = (): Tweet[] =>
+  useStore((state) => (state as GlobalStateStoreType).nodesFromServer);
 export const useSelectedNode = () =>
   useStore((state) => (state as GlobalStateStoreType).selectedNode);
 export const useSetSelectedNode = () =>
@@ -293,37 +292,37 @@ export const useStoredSaves = () =>
     setSaves: (state as GlobalStateStoreType).setSavedDatasets,
   }));
 
-/** transform and save tweets to store */
+/** transform and save nodes to store */
 export const useSetTweets = () => {
   const { replace } = useConfig();
   const setRetweets = useSetRetweetsByTweetId();
   const setLikes = useSetLikesByUserId();
-  const tweetsFromServer = useStore(
-    (state) => (state as GlobalStateStoreType).tweetsFromServer
+  const nodesFromServer = useStore(
+    (state) => (state as GlobalStateStoreType).nodesFromServer
   );
   const setTweetsFromServer = useStore(
     (state) => (state as GlobalStateStoreType).setTweetsFromServer
   );
-  return (tweetsArg: Tweet[], forceReplace: boolean = false) => {
+  return (nodesArg: Tweet[], forceReplace: boolean = false) => {
     if (replace || forceReplace) {
       // delete all likes, retweets
       setRetweets({});
       setLikes({});
     }
 
-    const isError = !Array.isArray(tweetsArg);
+    const isError = !Array.isArray(nodesArg);
     if (isError) {
-      console.error(tweetsArg);
+      console.error(nodesArg);
     }
-    const tweets = isError ? [] : tweetsArg;
+    const nodes = isError ? [] : nodesArg;
 
     const newTweets =
       replace || forceReplace
-        ? tweets
-        : uniqBy([...tweetsFromServer, ...tweets], (t) => t.id_str);
+        ? nodes
+        : uniqBy([...nodesFromServer, ...nodes], (t) => t.id_str);
 
-    // * whenever we change the tweets,
-    // * scan all the tweets once to create
+    // * whenever we change the nodes,
+    // * scan all the nodes once to create
     // * retweetsByTweetId
 
     const retweetsByTweetId: { [tweetId: string]: string[] } = newTweets.reduce(
@@ -333,9 +332,9 @@ export const useSetTweets = () => {
         const hasRetweet = tweet?.retweeted_status?.id_str;
         // add its id_str to the array associated with its tweet.id_str
         if (hasRetweet) {
-          // check the existing tweets for this tweet,
+          // check the existing nodes for this tweet,
           // if it exists, add it to the list to create a link
-          // *(this operation is now O^N2, but it's only performed when the tweets change)
+          // *(this operation is now O^N2, but it's only performed when the nodes change)
           const isRetweetInAllTweets = Boolean(
             newTweets.find((t) => t.id_str === tweet.retweeted_status?.id_str)
           );
@@ -382,25 +381,25 @@ export const useSetTweets = () => {
   };
 };
 
-/** transform and add tweets to store */
+/** transform and add nodes to store */
 export const useAddTweets = () => {
-  const tweetsFromServer = useStore(
-    (state) => (state as GlobalStateStoreType).tweetsFromServer
+  const nodesFromServer = useStore(
+    (state) => (state as GlobalStateStoreType).nodesFromServer
   );
   const setTweetsFromServer = useStore(
     (state) => (state as GlobalStateStoreType).setTweetsFromServer
   );
 
-  return (tweets: Tweet[]) => {
-    const newTweets = uniqBy([...tweetsFromServer, ...tweets], (t) => t.id_str);
+  return (nodes: Tweet[]) => {
+    const newTweets = uniqBy([...nodesFromServer, ...nodes], (t) => t.id_str);
     setTweetsFromServer(newTweets);
   };
 };
 
 /** delete a tweet from store */
 export const useDeleteTweet = () => {
-  const tweetsFromServer = useStore(
-    (state) => (state as GlobalStateStoreType).tweetsFromServer,
+  const nodesFromServer = useStore(
+    (state) => (state as GlobalStateStoreType).nodesFromServer,
     shallow
   );
   const setTweetsFromServer = useStore(
@@ -408,10 +407,10 @@ export const useDeleteTweet = () => {
   );
   return useCallback(
     (tweetId: string) => {
-      const newTweets = tweetsFromServer.filter((t) => t.id_str !== tweetId);
+      const newTweets = nodesFromServer.filter((t) => t.id_str !== tweetId);
       setTweetsFromServer(newTweets);
     },
-    [tweetsFromServer, setTweetsFromServer]
+    [nodesFromServer, setTweetsFromServer]
   );
 };
 
@@ -467,9 +466,9 @@ export const useIsLeftDrawerOpen = () => {
 };
 
 export const useRecomputeGraph = () => {
-  const tweets = useTweets();
+  const nodes = useNodes();
   const setTweets = useSetTweets();
-  return () => setTimeout(() => setTweets(tweets));
+  return () => setTimeout(() => setTweets(nodes));
 };
 
 export function usePrevious(value: any): typeof value {

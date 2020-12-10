@@ -5,7 +5,7 @@ import {
   useSetTweets,
   useLoading,
   useAddTweets,
-  useTweets,
+  useNodes,
   useAllowedMediaTypes,
   useSetLoading,
   useLikesByUserId,
@@ -25,8 +25,8 @@ export function useFetchTweetsByIds(): (ids: string[]) => void {
 
     const resp = await fetch(`${SERVER_URL}/api/get?ids=${ids.join(",")}`);
 
-    const tweetsResponses = await resp.json();
-    const data = tweetsResponses.map((d) => d.data);
+    const nodesResponses = await resp.json();
+    const data = nodesResponses.map((d) => d.data);
 
     setTweets(data);
   };
@@ -70,7 +70,7 @@ export function useFetchTimeline() {
   const { allowedMediaTypesParam } = useParamsForFetch();
 
   const setTweets = useSetTweets();
-  const tweets = useTweets();
+  const nodes = useNodes();
   const addTweets = useAddTweets();
 
   const fetchTimeline = async (
@@ -79,8 +79,8 @@ export function useFetchTimeline() {
   ) => {
     setLoading(true);
 
-    const tweetsByUser = tweets.filter((t) => t.user.id_str === userId);
-    const maxIdParam = getMaxIdParam(tweetsByUser);
+    const nodesByUser = nodes.filter((t) => t.user.id_str === userId);
+    const maxIdParam = getMaxIdParam(nodesByUser);
 
     const resp = await fetch(
       `${SERVER_URL}/api/user_timeline?id_str=${userId}&num=${numTweets}${maxIdParam}${allowedMediaTypesParam}`
@@ -93,10 +93,8 @@ export function useFetchTimeline() {
   const fetchTimelineByHandle = async (userHandle: string) => {
     setLoading(true);
 
-    const tweetsByUser = tweets.filter(
-      (t) => t.user.screen_name === userHandle
-    );
-    const maxIdParam = getMaxIdParam(tweetsByUser);
+    const nodesByUser = nodes.filter((t) => t.user.screen_name === userHandle);
+    const maxIdParam = getMaxIdParam(nodesByUser);
 
     const resp = await fetch(
       `${SERVER_URL}/api/user_timeline?screen_name=${userHandle}&num=${numTweets}${maxIdParam}${allowedMediaTypesParam}`
@@ -109,11 +107,11 @@ export function useFetchTimeline() {
   return { loading, fetchTimeline, fetchTimelineByHandle };
 }
 
-function getMaxIdParam(tweetsByUser: Tweet[]) {
-  return tweetsByUser.length === 0
+function getMaxIdParam(nodesByUser: Tweet[]) {
+  return nodesByUser.length === 0
     ? ""
     : // find the smallest tweet id to use as max_id
-      `&max_id=${tweetsByUser.reduce(
+      `&max_id=${nodesByUser.reduce(
         (acc, tweet) => Math.min(acc, Number(tweet.id_str)),
         Infinity
       )}`;
@@ -190,7 +188,7 @@ export function useFetchLikes() {
 }
 
 // TODO:
-/** fetch tweets replying to a tweet
+/** fetch nodes replying to a tweet
  * since we can only fetch from statuses/mentions_timeline,
  * we'll fetch all the replies to this user
  * * (later we could filter out other replies to this user, leaving only the ones to this tweet)
@@ -239,7 +237,7 @@ export function useParamsForFetch() {
       : `&allowedMediaTypes=${allowedMediaTypesStrings.join(",")}`;
   const countryParam =
     countryCode !== "All" ? `&countryCode=${countryCode}` : "";
-  // https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets
+  // https://developer.twitter.com/en/docs/twitter-api/v1/nodes/search/api-reference/get-search-nodes
   const searchRadius = geolocation
     ? geoDistanceKm(
         geolocation.latitude.left,

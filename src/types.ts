@@ -359,7 +359,7 @@ export interface QuotedStatus {
   in_reply_to_user_id: number | null;
   in_reply_to_user_id_str: null | string;
   in_reply_to_screen_name: null | string;
-  // https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/user-object
+  // https://developer.twitter.com/en/docs/nodes/data-dictionary/overview/user-object
   user: User;
   geo: null;
   coordinates: null;
@@ -379,7 +379,7 @@ export interface QuotedStatus {
   lang: string;
 }
 
-// https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/user-object
+// https://developer.twitter.com/en/docs/nodes/data-dictionary/overview/user-object
 export interface User {
   id: number;
   id_str: string;
@@ -560,5 +560,5 @@ export type GraphOfTweets = { nodes: Tweet[]; links: Link[] };
 export type GraphData = {
   graph: GraphOfTweets;
   users: User[];
-  tweets: Tweet[];
+  nodes: Tweet[];
 };

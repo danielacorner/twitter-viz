@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router";
-import { useTweets } from "../providers/store";
+import { useNodes } from "../providers/store";
 import { TAB_INDICES } from "utils/constants";
 import qs from "query-string";
 
-/** when the tweets change, update the url */
+/** when the nodes change, update the url */
 export default function useSyncStateToUrl(): [
   number,
   React.Dispatch<React.SetStateAction<number>>
 ] {
-  const tweets = useTweets();
+  const nodes = useNodes();
   const history = useHistory();
   const { pathname, search } = useLocation();
   const queryObj = qs.parse(search);
@@ -20,13 +20,13 @@ export default function useSyncStateToUrl(): [
 
   const [tabIndex, setTabIndex] = useState(initialTabIndex);
 
-  // TODO: not working when fetch tweets by id?
+  // TODO: not working when fetch nodes by id?
   useEffect(() => {
     // const queryObj = qs.parse(search);
     const newQueryObj = {
       ...queryObj,
       tab: tabIndex,
-      tweets: tweets.map((t) => t.id_str).join(","),
+      nodes: nodes.map((t) => t.id_str).join(","),
     };
 
     const newSearch = "?" + qs.stringify(newQueryObj);
@@ -37,6 +37,6 @@ export default function useSyncStateToUrl(): [
     if (newPathAndSearch !== oldPathAndSearch) {
       history.push(newPathAndSearch);
     }
-  }, [pathname, history, tweets, tabIndex, search, queryObj]);
+  }, [pathname, history, nodes, tabIndex, search, queryObj]);
   return [tabIndex, setTabIndex];
 }
