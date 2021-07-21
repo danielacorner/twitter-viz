@@ -39,6 +39,8 @@ const GalleryStyles = styled.div`
     width: 100%;
   }
   .tweetContent {
+    border-radius: 16px;
+    background: hsl(0, 0%, 15%);
     position: relative;
 
     width: 100%;
@@ -46,6 +48,7 @@ const GalleryStyles = styled.div`
 
     display: grid;
     place-content: start;
+    justify-content: normal;
 
     border: 1px solid hsl(0, 0%, ${(props) => (props.isLight ? "70" : "30")}%);
     margin: -0.5px;
@@ -209,22 +212,22 @@ function GridItem({ tweet }: { tweet: Tweet }) {
   const tweetWidth = 430;
   const avatarSectionHeight = 150;
   const textSectionHeight = tweet.text ? 50 : 0;
-  const height =
-    (totalHeight / firstItemWidth) * tweetWidth +
-    avatarSectionHeight +
-    textSectionHeight;
+  // const height =
+  //   (totalHeight / firstItemWidth) * tweetWidth +
+  //   avatarSectionHeight +
+  //   textSectionHeight;
   return (
     <div
       className="tweetContent"
       ref={ref}
       style={{
         gridRow: `span ${rowSpan}`,
-        ...(isMediaTweet
-          ? {
-              height,
-              gridTemplateRows: `auto repeat(${mediaArr.length}, auto)`,
-            }
-          : {}),
+        // ...(isMediaTweet
+        //   ? {
+        //       height,
+        //       gridTemplateRows: `auto repeat(${mediaArr.length}, auto)`,
+        //     }
+        //   : {}),
       }}
     >
       <UserAvatar user={tweet.user} imageOnly={true} />

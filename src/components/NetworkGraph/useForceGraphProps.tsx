@@ -97,7 +97,7 @@ export function useForceGraphProps() {
     nodeColor: (node) => getNodeColor(node, colorBy),
     // onEngineStop: () =>
     //   fgRef.current && !is3d ? (fgRef.current as any).zoomToFit(400) : null,
-    nodeCanvasObject: (node: Tweet & { x: number; y: number }, ctx) => {
+    nodeCanvasObject: ((node: Tweet & { x: number; y: number }, ctx) => {
       // draw the bot score if we have one
       const MOCK_BOT_SCORE: BotScore = {
         overall: 1,
@@ -177,7 +177,7 @@ export function useForceGraphProps() {
         ctx.fillStyle = getNodeColor(node, colorBy);
         ctx.fill();
       }
-    },
+    }) as any,
     linkWidth: 1,
     backgroundColor: "transparent",
     linkColor: (({ source, target }) => {

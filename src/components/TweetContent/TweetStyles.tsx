@@ -99,6 +99,7 @@ export const TweetStyles = styled.div`
     text-align: left;
   }
   .allMedia {
+    width: 100%;
     height: ${(props) => (props.isGallery ? props.mediaHeight + "px" : "100%")};
     .imgLink {
       cursor: pointer;

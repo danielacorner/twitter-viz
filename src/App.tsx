@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import styled from "styled-components/macro";
 import { useLoading } from "./providers/store/useSelectors";
@@ -10,6 +10,9 @@ import LeftDrawerCollapsible from "components/LeftDrawer";
 import { RowDiv } from "components/common/styledComponents";
 import { NavBar } from "components/NavBar/NavBar";
 import NetworkGraph from "components/NetworkGraph/NetworkGraph";
+import { Drawer, IconButton, Tooltip } from "@material-ui/core";
+import Gallery from "components/Gallery/Gallery";
+import { Collections } from "@material-ui/icons";
 
 const AppStyles = styled.div`
   transition: background 0.5s cubic-bezier(0.075, 0.82, 0.165, 1);
@@ -34,6 +37,7 @@ function App() {
       <RowDiv>
         <NetworkGraph />
       </RowDiv>
+      <GalleryDrawer />
       <LeftDrawerCollapsible />
       <SelectedTweetModal />
       {/* <BottomDrawer /> */}
@@ -42,6 +46,44 @@ function App() {
     </AppStyles>
   );
 }
+
+function GalleryDrawer() {
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  return (
+    <>
+      <ButtonOpenRightDrawerStyles>
+        <Tooltip title="Gallery">
+          <IconButton onClick={() => setIsGalleryOpen(!isGalleryOpen)}>
+            <Collections />
+          </IconButton>
+        </Tooltip>
+      </ButtonOpenRightDrawerStyles>
+      <Drawer
+        anchor="right"
+        open={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+      >
+        <DrawerContentStyles>
+          {isGalleryOpen && <Gallery />}
+        </DrawerContentStyles>
+      </Drawer>
+    </>
+  );
+}
+const DrawerContentStyles = styled.div`
+  min-width: 67vw;
+  max-width: calc(100vw - 32px);
+  background: hsl(0, 0%, 10%);
+`;
+const ButtonOpenRightDrawerStyles = styled.div`
+  position: fixed;
+  top: 64px;
+  right: 0;
+  z-index: 999;
+  svg {
+    fill: white;
+  }
+`;
 
 function AppStylesHooks() {
   const loading = useLoading();
